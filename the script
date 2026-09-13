@@ -1,72 +1,80 @@
--- FLAPPY BIRD ROBLOX - COMPATIBLE PC + MOBILE
--- Place dans StarterPlayer > StarterPlayerScripts
+--[[
+    FLAPPY BIRD ROBLOX - VERSION EXECUTOR
+    Compatible : Delta, Solara, Wave, Codex, Hydrogen, Krnl...
+    Usage : copier-coller dans l'executor, ou loadstring
+]]
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local GuiService = game:GetService("GuiService")
+-- Anti-duplication
+if _G.__FlappyBirdLoaded and _G.__FlappyBirdGUI then
+    pcall(function() _G.__FlappyBirdGUI:Destroy() end)
+end
+_G.__FlappyBirdLoaded = true
+
+local Players           = game:GetService("Players")
+local RunService        = game:GetService("RunService")
+local UserInputService  = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
+if not player then
+    warn("[Flappy] LocalPlayer introuvable.")
+    return
+end
+
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- ===== CONFIG =====
-local GRAVITY = 1800
-local FLAP_FORCE = -550
-local PIPE_SPEED = 220
-local PIPE_GAP = 170
-local PIPE_WIDTH = 70
+local GRAVITY      = 1800
+local FLAP_FORCE   = -550
+local PIPE_SPEED   = 220
+local PIPE_GAP     = 170
+local PIPE_WIDTH   = 70
 local PIPE_INTERVAL = 1.6
-local BIRD_SIZE = 32
+local BIRD_SIZE    = 32
 
--- Détection mobile
 local isMobile = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
-local isTouch = UserInputService.TouchEnabled
+local isTouch  = UserInputService.TouchEnabled
 
--- ===== UI PRINCIPALE =====
+-- ===== UI =====
 local gui = Instance.new("ScreenGui")
 gui.Name = "FlappyBirdGUI"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = playerGui
+_G.__FlappyBirdGUI = gui
 
--- Conteneur adaptatif (utilise AspectRatio pour rester carré/rectangulaire)
 local frame = Instance.new("Frame")
 frame.Name = "GameFrame"
 frame.AnchorPoint = Vector2.new(0.5, 0.5)
 frame.Position = UDim2.new(0.5, 0, 0.5, 0)
--- Sur mobile : prend presque tout l'écran
--- Sur PC : taille fixe raisonnable
 if isMobile then
-	frame.Size = UDim2.new(0.95, 0, 0.85, 0)
+    frame.Size = UDim2.new(0.95, 0, 0.85, 0)
 else
-	frame.Size = UDim2.new(0, 500, 0, 600)
+    frame.Size = UDim2.new(0, 500, 0, 600)
 end
 frame.BackgroundColor3 = Color3.fromRGB(113, 197, 207)
 frame.BorderSizePixel = 0
 frame.ClipsDescendants = true
 frame.Parent = gui
 
--- Utilise UIScale pour que tout soit proportionnel
 local uiScale = Instance.new("UIScale")
 uiScale.Parent = frame
 
 local function updateScale()
-	-- Référence : 500x600
-	local baseW, baseH = 500, 600
-	local absSize = frame.AbsoluteSize
-	local scaleX = absSize.X / baseW
-	local scaleY = absSize.Y / baseH
-	uiScale.Scale = math.min(scaleX, scaleY)
+    local absSize = frame.AbsoluteSize
+    local scaleX = absSize.X / 500
+    local scaleY = absSize.Y / 600
+    uiScale.Scale =.P math.min(scaleX, scaleY)
 end
 
--- Taille virtuelle du jeu (toujours 500x600 en interne)
-local VIRTUAL_W, VIRTUAL_H = 500, 600
+local VIRTUAL_W, VIRTUAL_H = 500, 600arent
 
 -- Sol
-local ground = Instance.new("Frame")
-ground.Size = UDim2.new(1, 0, 0, 60)
-ground.Position = UDim2.new(0, 0, 1, -60)
+local ground = Instance.new("Frame =")
+ground.Size = UDim2.new frame(1, 0, 0, 60)
+
+
+ground.Position = UDim2.new(0, --0, 1, -60)
 ground.BackgroundColor3 = Color3.fromRGB(222, 216, 149)
 ground.BorderSizePixel = 0
 ground.ZIndex = 2
@@ -80,12 +88,8 @@ bird.BackgroundColor3 = Color3.fromRGB(255, 220, 0)
 bird.BorderSizePixel = 0
 bird.ZIndex = 3
 bird.Parent = frame
+Instance.new("UICorner", bird).CornerRadius = UDim.new(1, 0)
 
-local birdCorner = Instance.new("UICorner")
-birdCorner.CornerRadius = UDim.new(1, 0)
-birdCorner.Parent = bird
-
--- Œil
 local eye = Instance.new("Frame")
 eye.Size = UDim2.new(0, 8, 0, 8)
 eye.Position = UDim2.new(0.6, 0, 0.2, 0)
@@ -93,11 +97,8 @@ eye.BackgroundColor3 = Color3.new(0, 0, 0)
 eye.BorderSizePixel = 0
 eye.ZIndex = 4
 eye.Parent = bird
-local eyeCorner = Instance.new("UICorner")
-eyeCorner.CornerRadius = UDim.new(1, 0)
-eyeCorner.Parent = eye
+Instance.new("UICorner", eye).CornerRadius = UDim.new(1, 0)
 
--- Bec
 local beak = Instance.new("Frame")
 beak.Size = UDim2.new(0, 12, 0, 8)
 beak.Position = UDim2.new(1, -4, 0.5, -4)
@@ -106,7 +107,6 @@ beak.BorderSizePixel = 0
 beak.ZIndex = 4
 beak.Parent = bird
 
--- Aile
 local wing = Instance.new("Frame")
 wing.Size = UDim2.new(0, 14, 0, 10)
 wing.Position = UDim2.new(0.15, 0, 0.5, -5)
@@ -114,9 +114,7 @@ wing.BackgroundColor3 = Color3.fromRGB(255, 180, 0)
 wing.BorderSizePixel = 0
 wing.ZIndex = 4
 wing.Parent = bird
-local wingCorner = Instance.new("UICorner")
-wingCorner.CornerRadius = UDim.new(1, 0)
-wingCorner.Parent = wing
+Instance.new("UICorner", wing).CornerRadius = UDim.new(1, 0)
 
 -- Score
 local scoreLabel = Instance.new("TextLabel")
@@ -130,9 +128,7 @@ scoreLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
 scoreLabel.Font = Enum.Font.FredokaOne
 scoreLabel.TextScaled = true
 scoreLabel.ZIndex = 5
-scoreLabel.Parent = frame
-
--- Message
+scoreLabel Message
 local msgLabel = Instance.new("TextLabel")
 msgLabel.Size = UDim2.new(1, 0, 0, 100)
 msgLabel.Position = UDim2.new(0, 0, 0.4, 0)
@@ -147,18 +143,17 @@ msgLabel.ZIndex = 5
 msgLabel.Visible = true
 msgLabel.Parent = frame
 
--- ===== HITBOX TACTILE INVISIBLE =====
--- Capture TOUS les taps/clics n'importe où sur le jeu
+-- Hitbox tactile
 local hitbox = Instance.new("TextButton")
 hitbox.Size = UDim2.new(1, 0, 1, 0)
 hitbox.Position = UDim2.new(0, 0, 0, 0)
 hitbox.BackgroundTransparency = 1
 hitbox.Text = ""
 hitbox.AutoButtonColor = false
-hitbox.ZIndex = 1 -- sous les éléments visuels mais détecte les clics
+hitbox.ZIndex = 1
 hitbox.Parent = frame
 
--- Bouton Fermer (coin haut-droit)
+-- Bouton fermer
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 40, 0, 40)
 closeBtn.Position = UDim2.new(1, -50, 0, 10)
@@ -170,12 +165,9 @@ closeBtn.TextScaled = true
 closeBtn.BorderSizePixel = 0
 closeBtn.ZIndex = 100
 closeBtn.Parent = frame
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1, 0)
 
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(1, 0)
-closeCorner.Parent = closeBtn
-
--- Bouton Rejouer (visible uniquement en Game Over)
+-- Bouton rejouer
 local replayBtn = Instance.new("TextButton")
 replayBtn.Size = UDim2.new(0, 200, 0, 60)
 replayBtn.Position = UDim2.new(0.5, -100, 0.6, 0)
@@ -188,12 +180,9 @@ replayBtn.BorderSizePixel = 0
 replayBtn.Visible = false
 replayBtn.ZIndex = 100
 replayBtn.Parent = frame
+Instance.new("UICorner", replayBtn).CornerRadius = UDim.new(0, 12)
 
-local replayCorner = Instance.new("UICorner")
-replayCorner.CornerRadius = UDim.new(0, 12)
-replayCorner.Parent = replayBtn
-
--- ===== ÉTAT DU JEU =====
+-- ===== ÉTAT =====
 local birdY = 300
 local birdVel = 0
 local pipes = {}
@@ -204,228 +193,200 @@ local spawnTimer = 0
 local frameHeight = 600
 local gameActive = true
 
--- ===== FONCTIONS =====
 local function createPipe()
-	local gapY = math.random(120, frameHeight - 120 - PIPE_GAP)
-	
-	local topPipe = Instance.new("Frame")
-	topPipe.Size = UDim2.new(0, PIPE_WIDTH, 0, gapY)
-	topPipe.Position = UDim2.new(0, VIRTUAL_W, 0, 0)
-	topPipe.BackgroundColor3 = Color3.fromRGB(80, 180, 60)
-	topPipe.BorderSizePixel = 0
-	topPipe.ZIndex = 2
-	topPipe.Parent = frame
-	
-	local topCap = Instance.new("Frame")
-	topCap.Size = UDim2.new(1, 6, 0, 20)
-	topCap.Position = UDim2.new(0, -3, 1, -20)
-	topCap.BackgroundColor3 = Color3.fromRGB(60, 150, 45)
-	topCap.BorderSizePixel = 0
-	topCap.ZIndex = 2
-	topCap.Parent = topPipe
-	
-	local bottomPipe = Instance.new("Frame")
-	bottomPipe.Size = UDim2.new(0, PIPE_WIDTH, 0, frameHeight - 60 - gapY - PIPE_GAP)
-	bottomPipe.Position = UDim2.new(0, VIRTUAL_W, 0, gapY + PIPE_GAP)
-	bottomPipe.BackgroundColor3 = Color3.fromRGB(80, 180, 60)
-	bottomPipe.BorderSizePixel = 0
-	bottomPipe.ZIndex = 2
-	bottomPipe.Parent = frame
-	
-	local bottomCap = Instance.new("Frame")
-	bottomCap.Size = UDim2.new(1, 6, 0, 20)
-	bottomCap.Position = UDim2.new(0, -3, 0, 0)
-	bottomCap.BackgroundColor3 = Color3.fromRGB(60, 150, 45)
-	bottomCap.BorderSizePixel = 0
-	bottomCap.ZIndex = 2
-	bottomCap.Parent = bottomPipe
-	
-	table.insert(pipes, {
-		top = topPipe,
-		bottom = bottomPipe,
-		x = VIRTUAL_W,
-		scored = false
-	})
+    local gapY = math.random(120, frameHeight - 120 - PIPE_GAP)
+
+    local topPipe = Instance.new("Frame")
+    topPipe.Size = UDim2.new(0, PIPE_WIDTH, 0, gapY)
+    topPipe.Position = UDim2.new(0, VIRTUAL_W, 0, 0)
+    topPipe.BackgroundColor3 = Color3.fromRGB(80, 180, 60)
+    topPipe.BorderSizePixel = 0
+    topPipe.ZIndex = 2
+    topPipe.Parent = frame
+
+    local topCap = Instance.new("Frame")
+    topCap.Size = UDim2.new(1, 6, 0, 20)
+    topCap.Position = UDim2.new(0, -3, 1, -20)
+    topCap.BackgroundColor3 = Color3.fromRGB(60, 150, 45)
+    topCap.BorderSizePixel = 0
+    topCap.ZIndex = 2
+    topCap.Parent = topPipe
+
+    local bottomPipe = Instance.new("Frame")
+    bottomPipe.Size = UDim2.new(0, PIPE_WIDTH, 0, frameHeight - 60 - gapY - PIPE_GAP)
+    bottomPipe.Position = UDim2.new(0, VIRTUAL_W, 0, gapY + PIPE_GAP)
+    bottomPipe.BackgroundColor3 = Color3.fromRGB(80, 180, 60)
+    bottomPipe.BorderSizePixel = 0
+    bottomPipe.ZIndex = 2
+    bottomPipe.Parent = frame
+
+    local bottomCap = Instance.new("Frame")
+    bottomCap.Size = UDim2.new(1, 6, 0, 20)
+    bottomCap.Position = UDim2.new(0, -3, 0, 0)
+    bottomCap.BackgroundColor3 = Color3.fromRGB(60, 150, 45)
+    bottomCap.BorderSizePixel = 0
+    bottomCap.ZIndex = 2
+    bottomCap.Parent = bottomPipe
+
+    table.insert(pipes, {
+        top = topPipe,
+        bottom = bottomPipe,
+        x = VIRTUAL_W,
+        scored = false
+    })
 end
 
 local function resetGame()
-	for _, pipe in ipairs(pipes) do
-		pipe.top:Destroy()
-		pipe.bottom:Destroy()
-	end
-	pipes = {}
-	birdY = 300
-	birdVel = 0
-	score = 0
-	scoreLabel.Text = "0"
-	spawnTimer = 0
-	msgLabel.Visible = false
-	replayBtn.Visible = false
-	gameState = "playing"
+    for _, pipe in ipairs(pipes) do
+        pipe.top:Destroy()
+        pipe.bottom:Destroy()
+    end
+    pipes = {}
+    birdY = 300
+    birdVel = 0
+    score = 0
+    scoreLabel.Text = "0"
+    spawnTimer = 0
+    msgLabel.Visible = false
+    replayBtn.Visible = false
+    gameState = "playing"
 end
 
 local function flap()
-	if not gameActive then return end
-	
-	if gameState == "waiting" then
-		resetGame()
-	end
-	if gameState == "playing" then
-		birdVel = FLAP_FORCE
-		-- Petit feedback visuel
-		wing.Rotation = -30
-		task.delay(0.1, function()
-			wing.Rotation = 0
-		end)
-	end
+    if not gameActive then return end
+    if gameState == "waiting" then resetGame() end
+    if gameState == "playing" then
+        birdVel = FLAP_FORCE
+        wing.Rotation = -30
+        task.delay(0.1, function() wing.Rotation = 0 end)
+    end
 end
 
 local function gameOver()
-	gameState = "gameover"
-	if score > bestScore then
-		bestScore = score
-	end
-	msgLabel.Text = "GAME OVER\nScore: " .. score .. "  |  Meilleur: " .. bestScore
-	msgLabel.Visible = true
-	replayBtn.Visible = true
+    gameState = "gameover"
+    if score > bestScore then bestScore = score end
+    msgLabel.Text = "GAME OVER\nScore: " .. score .. "  |  Meilleur: " .. bestScore
+    msgLabel.Visible = true
+    replayBtn.Visible = true
 end
 
--- ===== INPUTS =====
--- Clavier (PC)
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if input.KeyCode == Enum.KeyCode.Space 
-		or input.KeyCode == Enum.KeyCode.Up then
-		flap()
-	end
+-- Inputs clavier
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.Up then
+        flap()
+    end
 end)
 
--- Tap tactile sur la hitbox (mobile + souris PC)
+-- Tap tactile
 hitbox.MouseButton1Click:Connect(function()
-	if gameState == "gameover" then return end -- on utilise le bouton rejouer
-	flap()
+    if gameState == "gameover" then return end
+    flap()
 end)
 
--- Pour mobile : détection tactile directe (plus fiable)
 hitbox.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch then
-		if gameState == "gameover" then return end
-		flap()
-	end
+    if input.UserInputType == Enum.UserInputType.Touch then
+        if gameState == "gameover" then return end
+        flap()
+    end
 end)
 
--- Bouton fermer
-closeBtn.MouseButton1Click:Connect(function()
-	gameActive = false
-	gui:Destroy()
-end)
+-- Fermer (version executor)
+local function closeGame()
+    gameActive = false
+    pcall(function() gui:Destroy() end)
+    _G.__FlappyBirdLoaded = false
+    _G.__FlappyBirdGUI = nil
+end
 
+closeBtn.MouseButton1Click:Connect(closeGame)
 closeBtn.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch then
-		gameActive = false
-		gui:Destroy()
-	end
+    if input.UserInputType == Enum.UserInputType.Touch then
+        closeGame()
+    end
 end)
 
--- Bouton rejouer
-replayBtn.MouseButton1Click:Connect(function()
-	resetGame()
-end)
-
+-- Rejouer
+replayBtn.MouseButton1Click:Connect(resetGame)
 replayBtn.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch then
-		resetGame()
-	end
+    if input.UserInputType == Enum.UserInputType.Touch then
+        resetGame()
+    end
 end)
 
--- Mise à jour de l'échelle quand la taille change
 frame:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateScale)
 task.wait()
 updateScale()
 
--- Message de démarrage selon plateforme
 if isTouch and not UserInputService.MouseEnabled then
-	msgLabel.Text = "📱 TAP pour voler"
+    msgLabel.Text = "📱 TAP pour voler"
 elseif isTouch then
-	msgLabel.Text = "TAP ou ESPACE pour voler"
+    msgLabel.Text = "TAP ou ESPACE pour voler"
 else
-	msgLabel.Text = "ESPACE ou CLIC pour voler"
+    msgLabel.Text = "ESPACE ou CLIC pour voler"
 end
 
--- ===== BOUCLE PRINCIPALE =====
+-- Boucle principale
 local lastTime = tick()
-
 RunService.RenderStepped:Connect(function()
-	if not gameActive then return end
-	
-	local now = tick()
-	local dt = now - lastTime
-	lastTime = now
-	dt = math.min(dt, 0.1)
-	
-	if gameState == "playing" then
-		birdVel = birdVel + GRAVITY * dt
-		birdY = birdY + birdVel * dt
-		
-		local angle = math.clamp(birdVel / 15, -25, 70)
-		bird.Rotation = angle
-		
-		if birdY + BIRD_SIZE >= frameHeight - 60 then
-			birdY = frameHeight - 60 - BIRD_SIZE
-			gameOver()
-		end
-		
-		if birdY < 0 then
-			birdY = 0
-			birdVel = 0
-		end
-		
-		spawnTimer = spawnTimer + dt
-		if spawnTimer >= PIPE_INTERVAL then
-			spawnTimer = 0
-			createPipe()
-		end
-		
-		for i = #pipes, 1, -1 do
-			local pipe = pipes[i]
-			pipe.x = pipe.x - PIPE_SPEED * dt
-			pipe.top.Position = UDim2.new(0, pipe.x, 0, 0)
-			pipe.bottom.Position = UDim2.new(0, pipe.x, 0, pipe.top.AbsoluteSize.Y + PIPE_GAP)
-			
-			if not pipe.scored and pipe.x + PIPE_WIDTH < 100 then
-				pipe.scored = true
-				score = score + 1
-				scoreLabel.Text = tostring(score)
-			end
-			
-			if pipe.x + PIPE_WIDTH < 0 then
-				pipe.top:Destroy()
-				pipe.bottom:Destroy()
-				table.remove(pipes, i)
-			end
-		end
-		
-		-- Collisions
-		local birdLeft = 100
-		local birdRight = 100 + BIRD_SIZE
-		local birdTop = birdY
-		local birdBottom = birdY + BIRD_SIZE
-		
-		for _, pipe in ipairs(pipes) do
-			local pipeLeft = pipe.x
-			local pipeRight = pipe.x + PIPE_WIDTH
-			
-			if birdRight > pipeLeft and birdLeft < pipeRight then
-				local topPipeBottom = pipe.top.AbsoluteSize.Y
-				local bottomPipeTop = topPipeBottom + PIPE_GAP
-				
-				if birdTop < topPipeBottom or birdBottom > bottomPipeTop then
-					gameOver()
-					break
-				end
-			end
-		end
-	end
-	
-	bird.Position = UDim2.new(0, 100, 0, birdY)
+    if not gameActive then return end
+    local now = tick()
+    local dt = math.min(now - lastTime, 0.1)
+    lastTime = now
+
+    if gameState == "playing" then
+        birdVel = birdVel + GRAVITY * dt
+        birdY = birdY + birdVel * dt
+        bird.Rotation = math.clamp(birdVel / 15, -25, 70)
+
+        if birdY + BIRD_SIZE >= frameHeight - 60 then
+            birdY = frameHeight - 60 - BIRD_SIZE
+            gameOver()
+        end
+        if birdY < 0 then birdY = 0; birdVel = 0 end
+
+        spawnTimer = spawnTimer + dt
+        if spawnTimer >= PIPE_INTERVAL then
+            spawnTimer = 0
+            createPipe()
+        end
+
+        for i = #pipes, 1, -1 do
+            local pipe = pipes[i]
+            pipe.x = pipe.x - PIPE_SPEED * dt
+            pipe.top.Position = UDim2.new(0, pipe.x, 0, 0)
+            pipe.bottom.Position = UDim2.new(0, pipe.x, 0, pipe.top.AbsoluteSize.Y + PIPE_GAP)
+
+            if not pipe.scored and pipe.x + PIPE_WIDTH < 100 then
+                pipe.scored = true
+                score = score + 1
+                scoreLabel.Text = tostring(score)
+            end
+
+            if pipe.x + PIPE_WIDTH < 0 then
+                pipe.top:Destroy()
+                pipe.bottom:Destroy()
+                table.remove(pipes, i)
+            end
+        end
+
+        local birdLeft, birdRight = 100, 100 + BIRD_SIZE
+        local birdTop, birdBottom = birdY, birdY + BIRD_SIZE
+
+        for _, pipe in ipairs(pipes) do
+            local pipeLeft, pipeRight = pipe.x, pipe.x + PIPE_WIDTH
+            if birdRight > pipeLeft and birdLeft < pipeRight then
+                local topPipeBottom = pipe.top.AbsoluteSize.Y
+                local bottomPipeTop = topPipeBottom + PIPE_GAP
+                if birdTop < topPipeBottom or birdBottom > bottomPipeTop then
+                    gameOver()
+                    break
+                end
+            end
+        end
+    end
+
+    bird.Position = UDim2.new(0, 100, 0, birdY)
 end)
+
+print("[Flappy Bird] Chargé avec succès ✅")
